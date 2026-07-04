@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daurade Royale — COMMANDI</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:#e8e8e8;display:flex;justify-content:center;align-items:center;min-height:100vh}
+
+    .phone{width:340px;height:700px;background:#111;border-radius:36px;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;position:relative}
+
+    .icon{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+
+    /* Top bar */
+    .top-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;z-index:10}
+    .back-circle{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#fff}
+    .back-circle .icon{width:17px;height:17px}
+    .heart-circle{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff}
+    .heart-circle .icon{width:17px;height:17px}
+
+    /* Hero image */
+    .hero{height:220px;background:linear-gradient(160deg,#1a0a00 0%,#3d1500 40%,#7a2c00 70%,#c84b00 100%);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;color:rgba(255,255,255,.85);overflow:hidden}
+    .hero .icon{width:80px;height:80px;stroke-width:1.2}
+    .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.35) 100%)}
+
+    /* White card panel */
+    .panel{flex:1;background:#fff;border-radius:26px 26px 0 0;margin-top:-20px;position:relative;overflow-y:auto;display:flex;flex-direction:column;
+      scrollbar-width:none;          /* Firefox */
+      -ms-overflow-style:none;       /* IE / Edge legacy */
+    }
+    .panel::-webkit-scrollbar{display:none;width:0;height:0}  /* Chrome/Safari/Edge Chromium */
+    .panel-inner{padding:20px 18px 0}
+
+    /* Title row */
+    .title-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+    .product-name{font-size:20px;font-weight:800;color:#111827;line-height:1.2;flex:1;margin-right:10px}
+    .product-price{font-size:20px;font-weight:800;color:#f97316;white-space:nowrap}
+
+    /* Badges */
+    .badges{display:flex;gap:10px;margin-bottom:14px}
+    .badge{display:flex;align-items:center;gap:5px;font-size:10.5px;color:#6b7280;background:#f5f6fa;border-radius:8px;padding:4px 9px}
+    .badge .icon{width:12px;height:12px;color:#f97316}
+
+    /* Description */
+    .desc-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin-bottom:6px}
+    .desc-text{font-size:12px;color:#6b7280;line-height:1.6;margin-bottom:16px}
+
+    /* Customization */
+    .custom-label{font-size:14px;font-weight:700;color:#111827;margin-bottom:10px}
+    .option-row{display:flex;align-items:center;gap:10px;background:#f5f6fa;border-radius:11px;padding:10px 12px;margin-bottom:8px}
+    .option-icon{flex-shrink:0;color:#6b7280;display:flex}
+    .option-icon .icon{width:17px;height:17px}
+    .option-name{flex:1;font-size:12.5px;color:#374151;font-weight:500}
+    .qty-ctrl{display:flex;align-items:center;gap:8px}
+    .qty-btn{width:26px;height:26px;border-radius:50%;background:#fff;border:1.5px solid #e5e7eb;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#374151;transition:all .15s}
+    .qty-btn.plus{background:#f97316;border-color:#f97316;color:#fff}
+    .qty-btn:hover{opacity:.85}
+    .qty-val{font-size:13px;font-weight:700;color:#111827;width:16px;text-align:center}
+
+    /* Commander button */
+    .cmd-btn{margin:16px 18px 20px;background:#f97316;color:#fff;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;width:calc(100% - 36px);box-shadow:0 4px 16px rgba(249,115,22,.4);transition:background .2s,transform .1s,box-shadow .2s;flex-shrink:0}
+    .cmd-btn:hover{background:#ea6c0a;box-shadow:0 6px 20px rgba(249,115,22,.5)}
+    .cmd-btn:active{transform:scale(.98)}
+
+    /* Bottom nav */
+    .bottom-nav{background:#fff;border-top:1px solid #f0f0f0;padding:10px 0 14px;display:flex;justify-content:space-around;flex-shrink:0}
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;text-decoration:none;color:#9ca3af}
+    .nav-icon{display:flex}
+    .nav-icon .icon{width:21px;height:21px}
+    .nav-label{font-size:9.5px;font-weight:600;color:#9ca3af}
+    .nav-item.active{color:#f97316}
+    .nav-item.active .nav-label{color:#f97316}
+
+    /* ---- Récapitulatif de commande (bottom sheet) ---- */
+    .order-overlay{
+      position:absolute;inset:0;background:rgba(17,24,39,.5);
+      display:none;align-items:flex-end;justify-content:center;
+      z-index:100;
+    }
+    .order-overlay.open{display:flex}
+    .order-sheet{
+      width:100%;background:#fff;border-radius:24px 24px 0 0;
+      padding:20px 18px 22px;
+      transform:translateY(100%);transition:transform .28s ease;
+      box-shadow:0 -8px 30px rgba(0,0,0,.2);
+      max-height:88%;overflow-y:auto;
+    }
+    .order-overlay.open .order-sheet{transform:translateY(0)}
+    .sheet-handle{width:36px;height:4px;background:#e5e7eb;border-radius:3px;margin:0 auto 16px}
+    .sheet-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .sheet-title{font-size:16px;font-weight:800;color:#111827}
+    .sheet-close{width:28px;height:28px;border-radius:50%;background:#f5f6fa;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280}
+    .sheet-close .icon{width:14px;height:14px}
+
+    .sum-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0}
+    .sum-label{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#6b7280}
+    .sum-label .icon{width:15px;height:15px;color:#f97316;flex-shrink:0}
+    .sum-value{font-size:12.5px;font-weight:700;color:#111827}
+
+    .sum-divider{height:1px;background:#f0f0f0;margin:6px 0}
+
+    .sum-total{display:flex;align-items:center;justify-content:space-between;padding-top:10px}
+    .sum-total .sum-label{font-size:14px;font-weight:700;color:#111827}
+    .sum-total .sum-value{font-size:17px;font-weight:800;color:#f97316}
+
+    .address-block{background:#f5f6fa;border-radius:13px;padding:12px 13px;margin:14px 0 4px;display:flex;align-items:flex-start;gap:10px}
+    .address-block .icon{width:16px;height:16px;color:#f97316;flex-shrink:0;margin-top:1px}
+    .address-text{flex:1}
+    .address-title{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;margin-bottom:3px}
+    .address-value{font-size:12.5px;color:#111827;font-weight:600;line-height:1.4}
+    .address-input{width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px 9px;font-size:12px;font-family:inherit;color:#111827;margin-top:6px;display:none}
+    .address-edit{font-size:11px;color:#f97316;font-weight:700;background:none;border:none;cursor:pointer;flex-shrink:0}
+
+    .rider-block{background:#f5f6fa;border-radius:13px;padding:10px 13px;margin:8px 0 4px;display:flex;align-items:center;gap:10px}
+    .rider-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#3d3d6e);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(255,255,255,.85)}
+    .rider-avatar .icon{width:18px;height:18px}
+    .rider-rating{display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:#374151;flex-shrink:0}
+    .rider-rating .icon{width:12px;height:12px;color:#f97316}
+
+    .confirm-btn{width:100%;margin-top:18px;background:#f97316;color:#fff;border:none;border-radius:14px;padding:15px;font-size:14.5px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(249,115,22,.4);transition:background .2s,transform .1s}
+    .confirm-btn:hover{background:#ea6c0a}
+    .confirm-btn:active{transform:scale(.98)}
+  </style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Hero with floating back btn -->
+  <div style="position:relative;flex-shrink:0">
+    <div class="top-bar">
+      <a class="back-circle" href="restaurant.html">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
+      <button class="heart-circle">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+      </button>
+    </div>
+    <div class="hero">
+      <!-- PLACEHOLDER : remplace src="plat1.png" par le chemin de ta vraie photo -->
+      <img src="images/plat1.png" alt="Daurade Royale" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M6.5 12c0-3 4-7 11-7-1 2-1.5 3.5-1.5 5s.5 3 1.5 5c-7 0-11-4-11-7Z"/><circle cx="9" cy="10.5" r=".6" fill="currentColor" stroke="none"/><path d="M6.5 12 2 9.5M6.5 12 2 14.5"/></svg>
+    </div>
+  </div>
+
+  <!-- White panel -->
+  <div class="panel">
+    <div class="panel-inner">
+
+      <div class="title-row">
+        <div class="product-name">Daurade Royale</div>
+        <div class="product-price" id="dishPrice">450 DA</div>
+      </div>
+
+      <div class="badges">
+        <div class="badge">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 17a2.5 2.5 0 0 0 2.5-2.5c0-1.4-1.2-2.3-1.2-3.8 0-1 .5-2 1.2-2.7-.3 1.6.7 2.6 1.5 3.3.9.8 1.5 1.8 1.5 3.2A4.5 4.5 0 0 1 12 19a4.5 4.5 0 0 1-4.5-4.5c0-1.6.8-2.7 1-3"/></svg>
+          420 KCAL
+        </div>
+        <div class="badge">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 15"/><line x1="9" y1="2" x2="15" y2="2"/></svg>
+          LIVRAISON 20 MIN
+        </div>
+      </div>
+
+      <div class="desc-label">Description</div>
+      <div class="desc-text">
+        Une daurade fraîche grillée au feu de bois, à la peau légèrement croustillante et à la chair fondante, accompagnée d'un assortiment de légumes de saison et d'un filet d'huile d'olive citronnée.
+      </div>
+
+      <div class="custom-label">Personnaliser votre plat</div>
+
+      <div class="option-row">
+        <span class="option-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M5 9h14v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2Z"/><path d="M5 9V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><line x1="12" y1="13" x2="12" y2="16"/></svg></span>
+        <span class="option-name">Sauce citronnée</span>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
+          <span class="qty-val">1</span>
+          <button class="qty-btn plus" onclick="changeQty(this,1)">+</button>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <span class="option-icon"><svg class="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="4" ry="10" transform="rotate(45 12 12)"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="12" y1="12" x2="12.01" y2="12"/><line x1="15" y1="15" x2="15.01" y2="15"/></svg></span>
+        <span class="option-name">Légumes grillés</span>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
+          <span class="qty-val">1</span>
+          <button class="qty-btn plus" onclick="changeQty(this,1)">+</button>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <span class="option-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg></span>
+        <span class="option-name">Riz parfumé</span>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
+          <span class="qty-val">1</span>
+          <button class="qty-btn plus" onclick="changeQty(this,1)">+</button>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <span class="option-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M4 9.5c4-1 6-4.5 6-6.5 4 0 10 3.5 10 11A8 8 0 0 1 4 9.5Z"/><circle cx="9" cy="11" r=".8" fill="currentColor" stroke="none"/><circle cx="14" cy="14" r=".8" fill="currentColor" stroke="none"/><circle cx="11" cy="16" r=".8" fill="currentColor" stroke="none"/></svg></span>
+        <span class="option-name">Herbes fraîches</span>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
+          <span class="qty-val">1</span>
+          <button class="qty-btn plus" onclick="changeQty(this,1)">+</button>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="cmd-btn" onclick="openOrderSummary()">Commander</button>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <a class="nav-item" href="home.html">
+      <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <span class="nav-label">Explorer</span>
+    </a>
+    <a class="nav-item" href="tracking.html">
+      <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><polyline points="3 8 12 13 21 8"/><line x1="12" y1="13" x2="12" y2="22"/></svg></span>
+      <span class="nav-label">Commandes</span>
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M20.5 11.7 12.3 3.5a1.5 1.5 0 0 0-1.06-.44H4.5A1.5 1.5 0 0 0 3 4.56v6.74c0 .4.16.78.44 1.06l8.2 8.2a1.5 1.5 0 0 0 2.12 0l6.74-6.74a1.5 1.5 0 0 0 0-2.12Z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+      <span class="nav-label">Offres</span>
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span>
+      <span class="nav-label">Profil</span>
+    </a>
+  </div>
+
+  <!-- Récapitulatif de commande -->
+  <div class="order-overlay" id="orderOverlay" onclick="if(event.target===this) closeOrderSummary()">
+    <div class="order-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <span class="sheet-title">Récapitulatif de la commande</span>
+        <button class="sheet-close" onclick="closeOrderSummary()">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="sum-row">
+        <span class="sum-label">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/></svg>
+          Daurade Royale <span style="color:#d1d5db">×1</span>
+        </span>
+        <span class="sum-value" id="sumDish">450 DA</span>
+      </div>
+
+      <div class="sum-row">
+        <span class="sum-label">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M5.5 17.5 9 8h4l3 4.5h4"/><path d="M9 8 7 5H5"/></svg>
+          Frais de livraison
+        </span>
+        <span class="sum-value" id="sumDelivery">150 DA</span>
+      </div>
+
+      <div class="sum-divider"></div>
+
+      <div class="sum-total">
+        <span class="sum-label">Total à payer</span>
+        <span class="sum-value" id="sumTotal">600 DA</span>
+      </div>
+
+      <div class="address-block">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <div class="address-text">
+          <div class="address-title">Adresse de livraison</div>
+          <div class="address-value" id="addressValue">12 Rue de la Liberté, Béjaïa Centre, Béjaïa</div>
+          <input type="text" class="address-input" id="addressInput" value="12 Rue de la Liberté, Béjaïa Centre, Béjaïa">
+        </div>
+        <button class="address-edit" id="addressEditBtn" onclick="toggleAddressEdit()">Modifier</button>
+      </div>
+
+      <div class="rider-block">
+        <div class="rider-avatar">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        </div>
+        <div class="address-text">
+          <div class="address-title">Votre livreur</div>
+          <div class="address-value">Fares Benali</div>
+        </div>
+        <div class="rider-rating">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15 9 22 9.5 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.5 9 9"/></svg>
+          4.9
+        </div>
+      </div>
+
+      <button class="confirm-btn" onclick="confirmOrder()">Confirmer la commande</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function changeQty(btn, dir){
+  const row = btn.closest('.qty-ctrl');
+  const val = row.querySelector('.qty-val');
+  let v = parseInt(val.textContent) + dir;
+  if(v < 0) v = 0;
+  val.textContent = v;
+}
+
+// --- Récapitulatif de commande ---
+const DISH_PRICE = 450;
+const DELIVERY_FEE = 150;
+
+function openOrderSummary(){
+  document.getElementById('sumDish').textContent = DISH_PRICE + ' DA';
+  document.getElementById('sumDelivery').textContent = DELIVERY_FEE + ' DA';
+  document.getElementById('sumTotal').textContent = (DISH_PRICE + DELIVERY_FEE) + ' DA';
+  document.getElementById('orderOverlay').classList.add('open');
+}
+
+function closeOrderSummary(){
+  document.getElementById('orderOverlay').classList.remove('open');
+}
+
+function toggleAddressEdit(){
+  const valueEl = document.getElementById('addressValue');
+  const inputEl = document.getElementById('addressInput');
+  const btn = document.getElementById('addressEditBtn');
+  const editing = inputEl.style.display === 'block';
+
+  if(editing){
+    valueEl.textContent = inputEl.value;
+    valueEl.style.display = 'block';
+    inputEl.style.display = 'none';
+    btn.textContent = 'Modifier';
+  } else {
+    inputEl.style.display = 'block';
+    valueEl.style.display = 'none';
+    inputEl.focus();
+    btn.textContent = 'OK';
+  }
+}
+
+function confirmOrder(){
+  window.location.href = 'tracking.html';
+}
+</script>
+</body>
+</html>

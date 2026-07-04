@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COMMANDI — Connexion</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #e8e8e8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .phone {
+      width: 340px;
+      min-height: 660px;
+      background: #fff;
+      border-radius: 36px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.22), 0 4px 12px rgba(0,0,0,.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar { background: #f97316; height: 6px; width: 100%; }
+
+    .inner {
+      padding: 24px 24px 28px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .breadcrumb { font-size: 11px; color: #9ca3af; margin-bottom: 22px; }
+    .breadcrumb a { color: #6b7280; text-decoration: none; font-weight: 600; }
+    .breadcrumb a:hover { color: #f97316; }
+
+    .title { font-size: 23px; font-weight: 800; color: #111827; text-align: center; }
+    .title span { color: #f97316; }
+    .subtitle { font-size: 13px; color: #9ca3af; text-align: center; margin-top: 5px; }
+
+    .tabs {
+      display: flex;
+      background: #f0f1f5;
+      border-radius: 10px;
+      padding: 4px;
+      margin: 22px 0;
+      gap: 3px;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 9px 0;
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      color: #9ca3af;
+      transition: all .2s;
+      user-select: none;
+    }
+    .tab.active { background: #fff; color: #f97316; box-shadow: 0 1px 6px rgba(0,0,0,.09); }
+
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11.5px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 11px;
+      padding: 12px 14px;
+      gap: 10px;
+      background: #fafafa;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .input-wrap:focus-within { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,.1); background: #fff; }
+    .input-icon { font-size: 15px; color: #9ca3af; flex-shrink: 0; }
+    .input-wrap input { flex: 1; border: none; background: none; outline: none; font-size: 13.5px; color: #111827; }
+    .input-wrap input::placeholder { color: #c4c9d4; }
+
+    .eye-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: #9ca3af; padding: 0; }
+
+    .forgot {
+      display: block;
+      text-align: right;
+      font-size: 11.5px;
+      color: #f97316;
+      font-weight: 600;
+      margin-top: -6px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 15px;
+      background: #f97316;
+      color: #fff;
+      border: none;
+      border-radius: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(249,115,22,.35);
+      transition: background .2s, transform .1s;
+    }
+    .btn-login:hover { background: #ea6c0a; }
+    .btn-login:active { transform: scale(.98); }
+
+    .divider { display: flex; align-items: center; gap: 10px; margin: 18px 0; color: #d1d5db; font-size: 12px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+
+    .btn-create {
+      width: 100%;
+      padding: 14px;
+      background: #fff;
+      color: #374151;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 13px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+      transition: border-color .2s, background .2s, color .2s;
+    }
+    .btn-create:hover { border-color: #f97316; background: #fff7ed; color: #f97316; }
+
+    .footer { margin-top: 18px; font-size: 11px; color: #9ca3af; text-align: center; line-height: 1.6; }
+    .footer a { color: #f97316; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="top-bar"></div>
+    <div class="inner">
+
+      <p class="breadcrumb"><a href="index.html">← Accueil</a> › Connexion</p>
+
+      <h1 class="title">Bienvenue sur <span>Commandi</span></h1>
+      <p class="subtitle">Votre ville à domicile, en un clic.</p>
+
+      <div class="tabs" id="tabs">
+        <div class="tab" data-role="client"     onclick="switchTab(this)">Client</div>
+        <div class="tab" data-role="commercant" onclick="switchTab(this)">Partenaire</div>
+        <div class="tab" data-role="livreur"    onclick="switchTab(this)">Livreur</div>
+      </div>
+
+      <div class="field">
+        <label for="phone">Numéro de téléphone</label>
+        <div class="input-wrap">
+          <span class="input-icon">📱</span>
+          <input id="phone" type="tel" placeholder="05XX XX XX XX" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Mot de passe</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input id="password" type="password" placeholder="••••••••" />
+          <button class="eye-btn" onclick="togglePwd()">👁</button>
+        </div>
+      </div>
+
+      <a class="forgot" href="#">Mot de passe oublié ?</a>
+
+      <button class="btn-login" onclick="window.location.href='home.html'">
+        Se connecter &nbsp;→
+      </button>
+
+      <div class="divider">OU</div>
+
+      <a class="btn-create" href="index.html">Créer un compte</a>
+
+      <p class="footer">
+        En continuant, vous acceptez nos<br>
+        <a href="#">Conditions d'utilisation</a>
+      </p>
+
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get('role') || 'client';
+    document.querySelectorAll('.tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.role === role);
+    });
+
+    function switchTab(el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function togglePwd() {
+      const inp = document.getElementById('password');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+  </script>
+</body>
+</html>

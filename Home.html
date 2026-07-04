@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>COMMANDI — Explorer</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:#e8e8e8;display:flex;justify-content:center;align-items:center;min-height:100vh}
+
+    .phone{width:340px;height:700px;background:#f5f6fa;border-radius:36px;box-shadow:0 24px 60px rgba(0,0,0,.22);overflow:hidden;display:flex;flex-direction:column;position:relative}
+
+    .icon{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+
+    /* Header */
+    .header{background:#fff;padding:16px 18px 12px;border-bottom:1px solid #f0f0f0}
+    .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .logo{font-size:18px;font-weight:800;color:#111827}
+    .logo span{color:#f97316}
+    .icon-btn{width:36px;height:36px;border-radius:50%;background:#f5f6fa;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151}
+    .icon-btn .icon{width:17px;height:17px}
+
+    .search-bar{display:flex;align-items:center;gap:8px;background:#f5f6fa;border-radius:10px;padding:9px 12px;border:1.5px solid #e5e7eb}
+    .search-bar .icon{width:15px;height:15px;color:#9ca3af;flex-shrink:0}
+    .search-bar input{flex:1;border:none;background:none;outline:none;font-size:12.5px;color:#374151}
+    .search-bar input::placeholder{color:#b0b7c3}
+
+    .location-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+    .loc-select{display:flex;align-items:center;gap:5px;flex:1;background:#f5f6fa;border:1.5px solid #e5e7eb;border-radius:9px;padding:7px 11px;font-size:12px;color:#374151;cursor:pointer}
+    .loc-select .icon{width:14px;height:14px;color:#f97316;flex-shrink:0}
+    .loc-select .chevron{width:10px;height:10px;color:#9ca3af;margin-left:auto;flex-shrink:0}
+    .btn-filter{background:#f97316;color:#fff;border:none;border-radius:9px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+
+    /* Scrollable content */
+    .content{flex:1;overflow-y:auto;padding:16px 18px 0}
+    .content::-webkit-scrollbar{display:none}
+
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .section-title{font-size:14px;font-weight:700;color:#111827}
+    .see-all{font-size:11.5px;color:#f97316;font-weight:600;text-decoration:none}
+
+    /* Categories */
+    .cats{display:flex;gap:10px;margin-bottom:18px;overflow-x:auto;padding-bottom:4px}
+    .cats::-webkit-scrollbar{display:none}
+    .cat{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0}
+    .cat-icon{width:46px;height:46px;border-radius:14px;background:#fff;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;color:#374151;transition:all .2s}
+    .cat-icon .icon{width:21px;height:21px}
+    .cat:hover .cat-icon{border-color:#f97316;background:#fff7ed;color:#f97316}
+    .cat-label{font-size:10px;color:#6b7280;font-weight:500}
+
+    /* Restaurant cards */
+    .rest-card{background:#fff;border-radius:14px;overflow:hidden;margin-bottom:14px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform .15s,box-shadow .15s;text-decoration:none;display:block}
+    .rest-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
+    .rest-img{width:100%;height:120px;position:relative;overflow:hidden;background-size:cover;background-position:center}
+    .rest-img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,0) 45%);pointer-events:none}
+    .rest-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;backdrop-filter:blur(4px)}
+    .rest-rating{position:absolute;top:8px;right:8px;background:#fff;color:#111;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;display:flex;align-items:center;gap:3px}
+    .star{color:#f97316;width:11px;height:11px;fill:#f97316;stroke:#f97316}
+    .rest-info{padding:10px 12px}
+    .rest-name{font-size:13.5px;font-weight:700;color:#111827}
+    .rest-desc{font-size:11px;color:#9ca3af;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    /* Bottom nav */
+    .bottom-nav{background:#fff;border-top:1px solid #f0f0f0;padding:10px 0 14px;display:flex;justify-content:space-around}
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;text-decoration:none;color:#9ca3af}
+    .nav-icon{display:flex}
+    .nav-icon .icon{width:21px;height:21px}
+    .nav-label{font-size:9.5px;font-weight:600;color:#9ca3af}
+    .nav-item.active{color:#f97316}
+    .nav-item.active .nav-label{color:#f97316}
+  </style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-top">
+      <span class="logo">Comm<span>andi</span></span>
+      <button class="icon-btn">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+    </div>
+    <div class="search-bar">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Nom de commerce"/>
+    </div>
+    <div class="location-row">
+      <div class="loc-select">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span style="font-size:12px;flex:1">Béjaïa (Centre)</span>
+        <svg class="icon chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <button class="btn-filter">Filtrer</button>
+    </div>
+  </div>
+
+  <!-- Scrollable content -->
+  <div class="content">
+    <div style="margin-bottom:14px">
+      <h2 style="font-size:18px;font-weight:800;color:#111827">Envie de quoi aujourd'hui ?</h2>
+      <p style="font-size:12px;color:#9ca3af;margin-top:2px">Découvrez les meilleurs commerces à Béjaïa</p>
+    </div>
+
+    <!-- Categories -->
+    <div class="section-header">
+      <span class="section-title">Catégories</span>
+      <a class="see-all" href="#">Voir tout</a>
+    </div>
+    <div class="cats">
+      <div class="cat">
+        <div class="cat-icon">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M7 2v8a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M17 2c-1.5 1.5-2 3.5-2 6s.5 4.5 2 6v8"/></svg>
+        </div>
+        <span class="cat-label">Restaurant</span>
+      </div>
+      <div class="cat">
+        <div class="cat-icon">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 2 2 8.5 12 22 22 8.5Z"/><path d="M2 8.5h20"/><circle cx="9" cy="13" r=".8" fill="currentColor" stroke="none"/><circle cx="14" cy="16" r=".8" fill="currentColor" stroke="none"/><circle cx="11" cy="17.5" r=".8" fill="currentColor" stroke="none"/></svg>
+        </div>
+        <span class="cat-label">Pizzeria</span>
+      </div>
+      <div class="cat">
+        <div class="cat-icon">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 11a8 8 0 0 1 16 0Z"/><line x1="3" y1="15" x2="21" y2="15"/><path d="M5 15c0 3 3 5 7 5s7-2 7-5"/></svg>
+        </div>
+        <span class="cat-label">Fast Food</span>
+      </div>
+      <div class="cat">
+        <div class="cat-icon">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 13c0-4 3.5-6 8-6s8 2 8 6"/><path d="M3 13h18l-1.5 7a2 2 0 0 1-2 1.6H6.5a2 2 0 0 1-2-1.6Z"/><path d="M12 7V3"/></svg>
+        </div>
+        <span class="cat-label">Pâtisserie</span>
+      </div>
+      <div class="cat">
+        <div class="cat-icon">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 8h14v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M17 9h2a2 2 0 0 1 0 4h-2"/><line x1="6" y1="2" x2="6" y2="5"/><line x1="10" y1="2" x2="10" y2="5"/></svg>
+        </div>
+        <span class="cat-label">Café</span>
+      </div>
+    </div>
+
+    <!-- Popular restaurants -->
+    <div class="section-header">
+      <span class="section-title">Commerces Populaires</span>
+    </div>
+
+    <a class="rest-card" href="restaurant.html">
+      <div class="rest-img" style="background-image:url('images/image2.jpg')">
+        <span class="rest-badge">Restaurant</span>
+        <span class="rest-rating"><svg class="star" viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9.5 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.5 9 9"/></svg>4.8</span>
+      </div>
+      <div class="rest-info">
+        <div class="rest-name">Le Gourmet</div>
+        <div class="rest-desc">Cuisine gastronomique, Méditerranéenne, Spécialités locales</div>
+      </div>
+    </a>
+
+    <a class="rest-card" href="restaurant.html">
+      <div class="rest-img" style="background-image:url('images/image3.jpg')">
+        <span class="rest-badge">Pizzeria</span>
+        <span class="rest-rating"><svg class="star" viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9.5 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.5 9 9"/></svg>4.5</span>
+      </div>
+      <div class="rest-info">
+        <div class="rest-name">Pizza Hot</div>
+        <div class="rest-desc">Pizzas au feu de bois, Tacos, Burgers, Boissons fraîches</div>
+      </div>
+    </a>
+
+    <a class="rest-card" href="restaurant.html">
+      <div class="rest-img" style="background-image:url('images/image1.jpg')">
+        <span class="rest-badge">Pâtisserie</span>
+        <span class="rest-rating"><svg class="star" viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9.5 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.5 9 9"/></svg>4.9</span>
+      </div>
+      <div class="rest-info">
+        <div class="rest-name">Sweet Delights</div>
+        <div class="rest-desc">Gâteaux personnalisés, Viennoiseries, Macarons</div>
+      </div>
+    </a>
+
+    <div style="height:16px"></div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <a class="nav-item active" href="home.html">
+      <span class="nav-icon">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <span class="nav-label">Explorer</span>
+    </a>
+    <a class="nav-item" href="tracking.html">
+      <span class="nav-icon">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><polyline points="3 8 12 13 21 8"/><line x1="12" y1="13" x2="12" y2="22"/></svg>
+      </span>
+      <span class="nav-label">Commandes</span>
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20.5 11.7 12.3 3.5a1.5 1.5 0 0 0-1.06-.44H4.5A1.5 1.5 0 0 0 3 4.56v6.74c0 .4.16.78.44 1.06l8.2 8.2a1.5 1.5 0 0 0 2.12 0l6.74-6.74a1.5 1.5 0 0 0 0-2.12Z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+      </span>
+      <span class="nav-label">Offres</span>
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      </span>
+      <span class="nav-label">Profil</span>
+    </a>
+  </div>
+</div>
+</body>
+</html>

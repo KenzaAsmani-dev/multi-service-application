@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Suivi commande — COMMANDI</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:#e8e8e8;display:flex;justify-content:center;align-items:center;min-height:100vh}
+
+    .phone{width:340px;height:700px;background:#1c1c1e;border-radius:36px;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column}
+
+    .icon{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+
+    /* Top header */
+    .top-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#1c1c1e}
+    .back-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#fff}
+    .back-btn .icon{width:17px;height:17px}
+    .header-title{font-size:14px;font-weight:700;color:#f97316}
+    .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ea580c);display:flex;align-items:center;justify-content:center;color:#fff}
+    .avatar .icon{width:17px;height:17px}
+
+    /* Map area */
+    .map-area{height:180px;background:linear-gradient(160deg,#2a2a3e 0%,#1e2840 50%,#253050 100%);position:relative;overflow:hidden;flex-shrink:0}
+    .map-area img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+    .map-area::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.35) 100%);z-index:1;pointer-events:none}
+    .map-grid{position:absolute;inset:0;opacity:.3;z-index:1}
+    .map-line-h{position:absolute;left:0;right:0;height:1px;background:#4a5568}
+    .map-line-v{position:absolute;top:0;bottom:0;width:1px;background:#4a5568}
+    .route-line{position:absolute;top:50%;left:15%;right:20%;height:50px;transform:translateY(-50%);z-index:2;pointer-events:none}
+    .route-line img{width:100%;height:100%;object-fit:contain;display:block}
+    .home-pin{position:absolute;right:16%;top:38%;color:#fff;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));z-index:2}
+    .home-pin .icon{width:24px;height:24px}
+    .store-pin{position:absolute;left:11%;top:34%;color:#fff;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));z-index:2}
+    .store-pin .icon{width:22px;height:22px}
+    .rider-pin{position:absolute;left:45%;top:38%;color:#f97316;filter:drop-shadow(0 2px 4px rgba(249,115,22,.6));z-index:2}
+    .rider-pin .icon{width:22px;height:22px}
+
+    /* ETA card */
+    .eta-card{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#fff;border-radius:14px;padding:8px 16px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);white-space:nowrap;z-index:3}
+    .eta-icon{color:#f97316;display:flex}
+    .eta-icon .icon{width:18px;height:18px}
+    .eta-time{font-size:17px;font-weight:800;color:#111827}
+    .eta-label{font-size:10px;color:#9ca3af;margin-top:1px}
+
+    /* White panel */
+    .panel{flex:1;background:#fff;border-radius:24px 24px 0 0;margin-top:-16px;overflow-y:auto;display:flex;flex-direction:column;
+      scrollbar-width:none;          /* Firefox */
+      -ms-overflow-style:none;       /* IE / Edge legacy */
+    }
+    .panel::-webkit-scrollbar{display:none;width:0;height:0}  /* Chrome/Safari/Edge Chromium */
+
+    /* Driver card */
+    .driver-card{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid #f0f0f0}
+    .driver-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#3d3d6e);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;color:rgba(255,255,255,.85)}
+    .driver-avatar .icon{width:24px;height:24px}
+    .driver-badge{position:absolute;bottom:0;right:-2px;background:#f97316;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;color:#fff}
+    .driver-badge .icon{width:9px;height:9px}
+    .driver-info{flex:1}
+    .driver-name{font-size:14px;font-weight:700;color:#111827}
+    .driver-role{font-size:11px;color:#9ca3af;margin-top:2px}
+    .driver-rating{display:flex;align-items:center;gap:3px;margin-top:2px}
+    .driver-rating .icon{width:11px;height:11px;color:#f97316;fill:#f97316}
+    .action-btns{display:flex;gap:8px}
+    .action-btn{width:36px;height:36px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .action-btn .icon{width:16px;height:16px}
+    .btn-call{background:#fff7ed;color:#f97316}
+    .btn-msg{background:#f97316;color:#fff}
+
+    /* Timeline */
+    .timeline-section{padding:14px 18px}
+    .tl-title{font-size:14px;font-weight:700;color:#111827;margin-bottom:14px}
+    .tl-item{display:flex;gap:12px;margin-bottom:16px;position:relative}
+    .tl-item:not(:last-child)::before{content:'';position:absolute;left:11px;top:24px;bottom:-10px;width:2px;background:#e5e7eb}
+    .tl-item.done::before{background:#f97316}
+    .tl-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid #e5e7eb;background:#fff;color:#9ca3af}
+    .tl-dot .icon{width:13px;height:13px}
+    .tl-item.done .tl-dot{background:#f97316;border-color:#f97316;color:#fff}
+    .tl-item.active .tl-dot{background:#fff7ed;border-color:#f97316;color:#f97316}
+    .tl-item.pending .tl-dot{color:#9ca3af}
+    .tl-text{}
+    .tl-name{font-size:13px;font-weight:600;color:#111827}
+    .tl-item.pending .tl-name{color:#9ca3af}
+    .tl-desc{font-size:11px;color:#9ca3af;margin-top:2px;line-height:1.4}
+
+    /* Bottom */
+    .bottom-wrap{padding:14px 18px 18px;flex-shrink:0}
+    .btn-cmd{width:100%;background:#f97316;color:#fff;border:none;border-radius:14px;padding:15px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(249,115,22,.35);transition:background .2s}
+    .btn-cmd:hover{background:#ea6c0a}
+
+    /* Bottom nav */
+    .bottom-nav{background:#fff;border-top:1px solid #f0f0f0;padding:10px 0 14px;display:flex;justify-content:space-around;flex-shrink:0}
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;text-decoration:none;color:#9ca3af}
+    .nav-icon{display:flex}
+    .nav-icon .icon{width:21px;height:21px}
+    .nav-label{font-size:9.5px;font-weight:600;color:#9ca3af}
+    .nav-item.active{color:#f97316}
+    .nav-item.active .nav-label{color:#f97316}
+  </style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Header -->
+  <div class="top-header">
+    <a class="back-btn" href="home.html">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <span class="header-title">En cours de livraison</span>
+    <div class="avatar">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div class="map-area">
+    <!-- PLACEHOLDER : remplace src="map.png" par une vraie capture de carte (Google Maps, etc.) -->
+    <img src="map.png" alt="Carte de livraison" onerror="this.style.display='none'">
+    <!-- Grid lines -->
+    <div class="map-grid">
+      <div class="map-line-h" style="top:25%"></div>
+      <div class="map-line-h" style="top:50%"></div>
+      <div class="map-line-h" style="top:75%"></div>
+      <div class="map-line-v" style="left:25%"></div>
+      <div class="map-line-v" style="left:50%"></div>
+      <div class="map-line-v" style="left:75%"></div>
+    </div>
+    <div class="route-line">
+      <!-- PLACEHOLDER : remplace src="route.png" par une vraie image d'itinéraire (ligne pointillée/courbe) -->
+      <img src="route.png" alt="Itinéraire" onerror="this.outerHTML='<div style=\'position:absolute;top:50%;left:0;right:0;height:2px;background:#f97316;transform:translateY(-50%);border-radius:1px\'><span style=\'position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:#f97316;border-radius:50%;display:block\'></span></div>'">
+    </div>
+    <div class="store-pin">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/></svg>
+    </div>
+    <div class="rider-pin">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M5.5 17.5 9 8h4l3 4.5h4"/><path d="M9 8 7 5H5"/></svg>
+    </div>
+    <div class="home-pin">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+    </div>
+    <!-- ETA -->
+    <div class="eta-card">
+      <span class="eta-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 15"/><line x1="9" y1="2" x2="15" y2="2"/></svg></span>
+      <div>
+        <div class="eta-time">7-10 min</div>
+        <div class="eta-label">Temps de livraison estimé</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel -->
+  <div class="panel">
+
+    <!-- Driver -->
+    <div class="driver-card">
+      <div class="driver-avatar">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span class="driver-badge"><svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15 9 22 9.5 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.5 9 9"/></svg></span>
+      </div>
+      <div class="driver-info">
+        <div class="driver-name">Fares Benali</div>
+        <div class="driver-role">Votre livreur</div>
+        <div class="driver-rating">
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9.5 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.5 9 9"/></svg>
+          <span style="font-size:10.5px;color:#374151;font-weight:600">4.9</span>
+        </div>
+      </div>
+      <div class="action-btns">
+        <button class="action-btn btn-call">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.9.6 2.7a2 2 0 0 1-.4 2.1L8.1 9.7a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.9 2.2Z"/></svg>
+        </button>
+        <button class="action-btn btn-msg">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-section">
+      <div class="tl-title">Suivi de la commande</div>
+
+      <div class="tl-item done">
+        <div class="tl-dot"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="tl-text">
+          <div class="tl-name">Commande reçue</div>
+          <div class="tl-desc">Nous avons confirmé votre commande à 12:30</div>
+        </div>
+      </div>
+
+      <div class="tl-item done">
+        <div class="tl-dot"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="tl-text">
+          <div class="tl-name">Préparation du repas</div>
+          <div class="tl-desc">La cuisine prépare votre commande</div>
+        </div>
+      </div>
+
+      <div class="tl-item active">
+        <div class="tl-dot"><svg class="icon" viewBox="0 0 24 24"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M5.5 17.5 9 8h4l3 4.5h4"/><path d="M9 8 7 5H5"/></svg></div>
+        <div class="tl-text">
+          <div class="tl-name" style="color:#f97316">En route</div>
+          <div class="tl-desc">Ralph est à 2,4 km de vous</div>
+        </div>
+      </div>
+
+      <div class="tl-item pending">
+        <div class="tl-dot"><svg class="icon" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></div>
+        <div class="tl-text">
+          <div class="tl-name">Livré</div>
+          <div class="tl-desc">Bon appétit !</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-wrap">
+      <button class="btn-cmd" onclick="window.location.href='home.html'">Ma Commande</button>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <a class="nav-item" href="home.html">
+      <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <span class="nav-label">Explorer</span>
+    </a>
+    <a class="nav-item active" href="tracking.html">
+      <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><polyline points="3 8 12 13 21 8"/><line x1="12" y1="13" x2="12" y2="22"/></svg></span>
+      <span class="nav-label">Commandes</span>
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M20.5 11.7 12.3 3.5a1.5 1.5 0 0 0-1.06-.44H4.5A1.5 1.5 0 0 0 3 4.56v6.74c0 .4.16.78.44 1.06l8.2 8.2a1.5 1.5 0 0 0 2.12 0l6.74-6.74a1.5 1.5 0 0 0 0-2.12Z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+      <span class="nav-label">Offres</span>
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span>
+      <span class="nav-label">Profil</span>
+    </a>
+  </div>
+</div>
+</body>
+</html>
