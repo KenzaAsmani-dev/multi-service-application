@@ -59,6 +59,15 @@
     .qty-btn:hover{opacity:.85}
     .qty-val{font-size:13px;font-weight:700;color:#111827;width:16px;text-align:center}
 
+    /* Ajout d'ingrédient personnalisé */
+    .add-ingredient-row{display:flex;gap:8px;margin-bottom:14px}
+    .ingredient-input{flex:1;border:1.5px solid #e5e7eb;border-radius:11px;padding:10px 12px;font-size:12.5px;font-family:inherit;color:#374151;outline:none;transition:border-color .15s}
+    .ingredient-input:focus{border-color:#f97316}
+    .add-ingredient-btn{width:40px;height:40px;border-radius:11px;background:#f97316;border:none;color:#fff;font-size:20px;font-weight:700;cursor:pointer;flex-shrink:0;transition:background .15s}
+    .add-ingredient-btn:hover{background:#ea6c0a}
+    .custom-option-row{display:flex;align-items:center;gap:10px;background:#fff7ed;border:1.5px dashed #f97316;border-radius:11px;padding:10px 12px;margin-bottom:8px}
+    .custom-remove-btn{width:24px;height:24px;border-radius:50%;background:#fee2e2;border:none;color:#dc2626;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
     /* Commander button */
     .cmd-btn{margin:16px 18px 20px;background:#f97316;color:#fff;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;width:calc(100% - 36px);box-shadow:0 4px 16px rgba(249,115,22,.4);transition:background .2s,transform .1s,box-shadow .2s;flex-shrink:0}
     .cmd-btn:hover{background:#ea6c0a;box-shadow:0 6px 20px rgba(249,115,22,.5)}
@@ -211,6 +220,20 @@
         </div>
       </div>
 
+      <!-- Ajout d'un ingrédient personnalisé -->
+      <div id="customIngredientsList"></div>
+
+      <div class="add-ingredient-row">
+        <input 
+          type="text" 
+          id="newIngredientInput" 
+          class="ingredient-input" 
+          placeholder="Ajouter un ingrédient (ex: Piment)"
+          onkeypress="if(event.key==='Enter') addCustomIngredient()"
+        >
+        <button class="add-ingredient-btn" onclick="addCustomIngredient()">+</button>
+      </div>
+
     </div>
 
     <button class="cmd-btn" onclick="openOrderSummary()">Commander</button>
@@ -253,6 +276,14 @@
           Daurade Royale <span style="color:#d1d5db">×1</span>
         </span>
         <span class="sum-value" id="sumDish">450 DA</span>
+      </div>
+
+      <div class="sum-row" id="sumCustomRow" style="display:none">
+        <span class="sum-label">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ingrédients ajoutés
+        </span>
+        <span class="sum-value" id="sumCustom">0 DA</span>
       </div>
 
       <div class="sum-row">
@@ -309,14 +340,70 @@ function changeQty(btn, dir){
   val.textContent = v;
 }
 
+// --- Ajout d'ingrédient personnalisé ---
+let customIngredientCount = 0;
+const customIngredients = {}; // { id: nom }
+const CUSTOM_INGREDIENT_PRICE = 50; // supplément par ingrédient ajouté (en DA)
+
+function addCustomIngredient(){
+  const input = document.getElementById('newIngredientInput');
+  const name = input.value.trim();
+  if(name === '') return;
+
+  customIngredientCount++;
+  const id = 'custom-' + customIngredientCount;
+  customIngredients[id] = name;
+
+  const row = document.createElement('div');
+  row.className = 'custom-option-row';
+  row.id = id;
+  row.innerHTML = `
+    <span class="option-icon">
+      <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </span>
+    <span class="option-name">${name}</span>
+    <div class="qty-ctrl">
+      <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
+      <span class="qty-val">1</span>
+      <button class="qty-btn plus" onclick="changeQty(this,1)">+</button>
+    </div>
+    <button class="custom-remove-btn" onclick="removeCustomIngredient('${id}')">×</button>
+  `;
+
+  document.getElementById('customIngredientsList').appendChild(row);
+  input.value = '';
+  input.focus();
+}
+
+function removeCustomIngredient(id){
+  const el = document.getElementById(id);
+  if(el){
+    el.remove();
+    delete customIngredients[id];
+  }
+}
+
 // --- Récapitulatif de commande ---
 const DISH_PRICE = 450;
 const DELIVERY_FEE = 150;
 
 function openOrderSummary(){
+  const nbCustom = Object.keys(customIngredients).length;
+  const extraCost = nbCustom * CUSTOM_INGREDIENT_PRICE;
+  const total = DISH_PRICE + DELIVERY_FEE + extraCost;
+
   document.getElementById('sumDish').textContent = DISH_PRICE + ' DA';
   document.getElementById('sumDelivery').textContent = DELIVERY_FEE + ' DA';
-  document.getElementById('sumTotal').textContent = (DISH_PRICE + DELIVERY_FEE) + ' DA';
+
+  const customRow = document.getElementById('sumCustomRow');
+  if(nbCustom > 0){
+    customRow.style.display = 'flex';
+    document.getElementById('sumCustom').textContent = extraCost + ' DA';
+  } else {
+    customRow.style.display = 'none';
+  }
+
+  document.getElementById('sumTotal').textContent = total + ' DA';
   document.getElementById('orderOverlay').classList.add('open');
 }
 
